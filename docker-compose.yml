@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+    postgres:
+        build: "./database"
+        environment: 
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: mysecretpassword
+            POSTGRES_DB: mydb
+        restart: always
