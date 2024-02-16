@@ -62,5 +62,43 @@ func (n *NatsEventStore) PublishCreatedFeed(ctx context.Context, feed *models.Fe
 	}
 
 	return n.conn.Publish(msg.Type(), data)
+}
 
+func (n *NatsEventStore) decodeMessage(data []byte, m any) error {
+	b := bytes.Buffer{}
+	b.Write(data)
+	return gob.NewDecoder(&b).Decode(m)
+}
+
+func (n *NatsEventStore) OnCreateFeed(f func(CreatedFeedMessage)) (err error) {
+	msg := CreatedFeedMessage{}
+	n.feedCreatedSub, err = n.conn.Subscribe(msg.Type(), func(m *nats.Msg) {
+		n.decodeMessage(m.Data, &msg)
+		f(msg)
+	})
+	return
+}
+
+func (n *NatsEventStore) SubscribeCreatedFeed(ctx context.Context) (<-chan CreatedFeedMessage, error) {
+	m := CreatedFeedMessage{}
+	n.feedCreatedChan = make(chan CreatedFeedMessage, 64)
+	ch := make(chan *nats.Msg, 64)
+
+	var err error
+	n.feedCreatedSub, err = n.conn.ChanSubscribe(m.Type(), ch)
+
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		for {
+			select {
+			case msg := <-ch: // una vez que ch reciba data, va entrar a este caso
+				n.decodeMessage(msg.Data, &m)
+				n.feedCreatedChan <- m // transmitimos m a n.feedCreatedChan
+			}
+		}
+	}()
+	return (<-chan CreatedFeedMessage)(n.feedCreatedChan), nil
 }
