@@ -8,6 +8,7 @@ import (
 	"github.com/go/events-cqrs-go/database"
 	"github.com/go/events-cqrs-go/events"
 	"github.com/go/events-cqrs-go/repository"
+	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -16,6 +17,12 @@ type Config struct {
 	PostgresUser     string `envconfig:"POSTGRES_USER"`
 	PostgresPassword string `envconfig:"POSTGRES_PASSWORD"`
 	NatsAddress      string `envconfig:"NATS_ADDRESS"`
+}
+
+func newRouter() (router *mux.Router) {
+	router = mux.NewRouter()
+	router.HandleFunc("/feeds", createdFeedHandler).Methods(http.MethodPost)
+	return
 }
 
 func main() {
