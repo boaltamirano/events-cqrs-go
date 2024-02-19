@@ -20,6 +20,7 @@ COPY database database
 COPY search search
 COPY models models
 COPY feedService feedService
+COPY queryService queryService
 
 RUN go install ./...
 
