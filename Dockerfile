@@ -21,6 +21,7 @@ COPY search search
 COPY models models
 COPY feedService feedService
 COPY queryService queryService
+COPY pusherService pusherService
 
 RUN go install ./...
 
