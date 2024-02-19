@@ -1,4 +1,4 @@
 FROM nginx:1.13.12
 
 COPY nginx.conf /etc/nginx/nginx.conf
-CMD ["nginx", "-g", "daemom off;"]
+CMD ["nginx", "-g", "daemon off;"]
